@@ -214,21 +214,33 @@ export default function WizardPage() {
   // ── Step 4: Edit evaluations ──────────────────────────────────────
 
   function updateEvaluation(altIdx: number, critId: string, term: string) {
-    const t = DEFAULT_RATING_TERMS.find((r) => r.term === term);
+    const t = DEFAULT_RATING_TERMS.find((r) => r.term === term) || DEFAULT_COST_TERMS.find((r) => r.term === term);
     if (!t) return;
+    
     setAlternatives((prev) =>
-      prev.map((alt, i) =>
-        i !== altIdx
-          ? alt
-          : {
-              ...alt,
-              evaluations: alt.evaluations.map((ev) =>
-                ev.criterion_id === critId
-                  ? { ...ev, rating_term: term, rating_l: t.l, rating_m: t.m, rating_u: t.u }
-                  : ev
-              ),
-            }
-      )
+      prev.map((alt, i) => {
+        if (i !== altIdx) return alt;
+        
+        const exists = alt.evaluations.some((ev) => ev.criterion_id === critId);
+        if (!exists) {
+          return {
+            ...alt,
+            evaluations: [
+              ...alt.evaluations,
+              { criterion_id: critId, rating_term: term, rating_l: t.l, rating_m: t.m, rating_u: t.u }
+            ]
+          };
+        }
+        
+        return {
+          ...alt,
+          evaluations: alt.evaluations.map((ev) =>
+            ev.criterion_id === critId
+              ? { ...ev, rating_term: term, rating_l: t.l, rating_m: t.m, rating_u: t.u }
+              : ev
+          ),
+        };
+      })
     );
   }
 
@@ -242,11 +254,25 @@ export default function WizardPage() {
     try {
       for (let i = 0; i < alternatives.length; i++) {
         const alt = alternatives[i];
+        
+        const completeEvaluations = criteria.map((c) => {
+          const existing = alt.evaluations.find((ev) => ev.criterion_id === c.id);
+          if (existing) return existing;
+          const t = c.criterion_type === "cost" ? DEFAULT_COST_TERMS[2] : DEFAULT_RATING_TERMS[2];
+          return {
+            criterion_id: c.id,
+            rating_term: t.term,
+            rating_l: t.l,
+            rating_m: t.m,
+            rating_u: t.u,
+          };
+        });
+
         const payload: CreateAlternativePayload = {
           problem_id: problemId!,
           name: alt.name,
           description: alt.description,
-          evaluations: alt.evaluations,
+          evaluations: completeEvaluations,
           position: i,
         };
         await createAlternative.mutateAsync(payload);
