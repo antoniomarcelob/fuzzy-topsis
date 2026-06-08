@@ -300,7 +300,14 @@ def _build_csv(problem: Problem, execution: Execution) -> str:
 
 
 async def _load_latest(db: AsyncSession, problem_id: str):
-    result_q = await db.execute(select(Problem).where(Problem.id == problem_id))
+    result_q = await db.execute(
+        select(Problem)
+        .options(
+            selectinload(Problem.criteria),
+            selectinload(Problem.alternatives),
+        )
+        .where(Problem.id == problem_id)
+    )
     problem = result_q.scalar_one_or_none()
     if not problem:
         raise HTTPException(status_code=404, detail="Problem not found")
