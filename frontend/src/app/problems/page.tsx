@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProblemList } from "@/components/forms/ProblemList";
 
 export default function ProblemsPage() {
   return (
@@ -18,11 +19,8 @@ export default function ProblemsPage() {
         </Link>
       </div>
 
-      {/* Problem list is a client component — see ProblemList.tsx */}
-      <div id="problem-list-placeholder" className="text-gray-400 text-sm">
-        {/* Client component (ProblemList) renders here */}
-        Carregando problemas...
-      </div>
+      {/* Problem list is a client component */}
+      <ProblemList />
     </main>
   );
 }
