@@ -136,7 +136,11 @@ class FuzzyTOPSIS:
         self._calculate_closeness_coefficients()
         self._generate_ranking()
 
-        best = self.steps.ranking[0]
+        if self.steps.ranking:
+            best = self.steps.ranking[0]
+        else:
+            raise ValueError("No alternatives found to rank.")
+
         return FuzzyTOPSISResult(
             steps=self.steps,
             best_alternative_id=best["alt_id"],
@@ -197,23 +201,32 @@ class FuzzyTOPSIS:
         FPIS A* = (ṽ*1, ṽ*2, ..., ṽ*n)
         FNIS A- = (ṽ-1, ṽ-2, ..., ṽ-n)
 
-        For both benefit and cost (already normalized):
-          FPIS: max upper bound per criterion
-          FNIS: min lower bound per criterion
+        # -------------------------------------------------------------------------
+        # MUDANÇA NA IMPLEMENTAÇÃO (Ajuste para a Literatura Clássica de Chen, 2000)
+        # -------------------------------------------------------------------------
+        # Na versão anterior, o sistema adotava uma variante heurística onde a FPIS 
+        # era construída através do valor máximo empírico encontrado na matriz 
+        # ponderada e a FNIS através do mínimo empírico:
+        #
+        # values = [self.steps.weighted_matrix[a.id][cid] for a in self.data.alternatives]
+        # self.steps.fpis[cid] = (max(v[0]), max(v[1]), max(v[2]))
+        # self.steps.fnis[cid] = (min(v[0]), min(v[1]), min(v[2]))
+        #
+        # Porém, de acordo com o artigo original de Chen (2000) "Extensions of the 
+        # TOPSIS for group decision-making under fuzzy environment" (Eq. 16 e 17),
+        # como a matriz já está normalizada na escala [0,1], o ideal positivo 
+        # absoluto antes do peso é (1,1,1) e o ideal negativo é (0,0,0). 
+        #
+        # Portanto, após a ponderação, a solução ideal positiva (FPIS) de um critério 
+        # é exatamente o peso fuzzy atribuído a ele: v_j^* = (1,1,1) ⊗ w_j = w_j.
+        # A solução ideal negativa (FNIS) é v_j^- = (0,0,0) ⊗ w_j = (0,0,0).
+        # Esta é a abordagem purista validada matematicamente pela literatura.
+        # -------------------------------------------------------------------------
         """
         for crit in self.data.criteria:
             cid = crit.id
-            values = [self.steps.weighted_matrix[a.id][cid] for a in self.data.alternatives]
-            self.steps.fpis[cid] = (
-                max(v[0] for v in values),
-                max(v[1] for v in values),
-                max(v[2] for v in values),
-            )
-            self.steps.fnis[cid] = (
-                min(v[0] for v in values),
-                min(v[1] for v in values),
-                min(v[2] for v in values),
-            )
+            self.steps.fpis[cid] = crit.weight
+            self.steps.fnis[cid] = (0.0, 0.0, 0.0)
 
     # ── Steps 7-8: Distances ──────────────────────────────────────────
 
