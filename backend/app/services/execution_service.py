@@ -55,8 +55,11 @@ class ExecutionService:
         await self.db.flush()
 
         try:
-            # Build input
             topsis_input = self._build_input(problem)
+            if len(topsis_input.alternatives) < 2:
+                raise ValueError("O problema deve ter pelo menos 2 alternativas para poder ser executado.")
+            if len(topsis_input.criteria) < 2:
+                raise ValueError("O problema deve ter pelo menos 2 critérios para poder ser executado.")
             log.info("Input built", n_criteria=len(topsis_input.criteria), n_alternatives=len(topsis_input.alternatives))
 
             # Run algorithm

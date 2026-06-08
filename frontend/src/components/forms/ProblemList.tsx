@@ -18,7 +18,8 @@ function ProblemCard({ problem }: { problem: ProblemListItem }) {
     try {
       const exec = await runExecution.mutateAsync();
       router.push(`/executions/${exec.id}`);
-    } catch {
+    } catch (err: any) {
+      alert(err.message || "Erro ao executar o problema");
       setIsRunning(false);
     }
   }

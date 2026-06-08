@@ -17,7 +17,7 @@ async def run_execution(problem_id: str, db: AsyncSession = Depends(get_db)):
     try:
         execution = await service.run(problem_id)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
 
