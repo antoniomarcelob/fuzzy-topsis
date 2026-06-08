@@ -11,7 +11,7 @@ import {
   useCreateAlternative,
   useRunExecution,
 } from "@/hooks/useApi";
-import { DEFAULT_WEIGHT_TERMS, DEFAULT_RATING_TERMS } from "@/types";
+import { DEFAULT_WEIGHT_TERMS, DEFAULT_RATING_TERMS, DEFAULT_COST_TERMS } from "@/types";
 import type { CreateAlternativePayload, CreateCriterionPayload } from "@/types";
 
 // ─────────────────────────────────────────────
@@ -588,7 +588,7 @@ export default function WizardPage() {
                             onChange={(e) => updateEvaluation(altIdx, c.id, e.target.value)}
                             className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400"
                           >
-                            {DEFAULT_RATING_TERMS.map((t) => (
+                            {(c.criterion_type === "cost" ? DEFAULT_COST_TERMS : DEFAULT_RATING_TERMS).map((t) => (
                               <option key={t.id} value={t.term}>{t.term}</option>
                             ))}
                           </select>
@@ -643,21 +643,30 @@ export default function WizardPage() {
             </div>
           </div>
 
-          <button
-            onClick={handleRun}
-            disabled={runExecution.isPending}
-            className="btn-primary text-base px-8 py-3 w-full"
-          >
-            {runExecution.isPending ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.3"/>
-                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
-                </svg>
-                Executando Fuzzy TOPSIS...
-              </span>
-            ) : "▶ Executar Fuzzy TOPSIS"}
-          </button>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => setStep(4)}
+              disabled={runExecution.isPending}
+              className="btn-secondary px-8 py-3 w-1/3"
+            >
+              ← Voltar
+            </button>
+            <button
+              onClick={handleRun}
+              disabled={runExecution.isPending}
+              className="btn-primary text-base px-8 py-3 w-2/3"
+            >
+              {runExecution.isPending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.3"/>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                  </svg>
+                  Executando Fuzzy TOPSIS...
+                </span>
+              ) : "▶ Executar Fuzzy TOPSIS"}
+            </button>
+          </div>
         </div>
       )}
     </main>

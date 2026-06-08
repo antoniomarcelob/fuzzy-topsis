@@ -178,3 +178,11 @@ export const DEFAULT_RATING_TERMS: LinguisticTerm[] = [
   { id: "g",  term: "Bom",        l: 5, m: 7, u: 9 },
   { id: "vg", term: "Muito Bom",  l: 7, m: 9, u: 9 },
 ];
+
+export const DEFAULT_COST_TERMS: LinguisticTerm[] = [
+  { id: "vl", term: "Muito Bom (Custo Baixo)",       l: 1, m: 1, u: 3 },
+  { id: "l",  term: "Bom (Custo Baixo)",             l: 1, m: 3, u: 5 },
+  { id: "m",  term: "Regular (Custo Médio)",         l: 3, m: 5, u: 7 },
+  { id: "h",  term: "Ruim (Custo Alto)",             l: 5, m: 7, u: 9 },
+  { id: "vh", term: "Muito Ruim (Custo Muito Alto)", l: 7, m: 9, u: 9 },
+];
